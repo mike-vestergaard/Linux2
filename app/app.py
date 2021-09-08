@@ -1,6 +1,6 @@
 
 
-from flask import Flask, redirect, url_for, render_template, request, session, flash
+from flask import Flask, redirect, url_for, render_template, request, session, flash, json
 from flaskext.mysql import MySQL
 from datetime import timedelta
 import mysql.connector
@@ -39,8 +39,37 @@ def showSignUp():
     return render_template('signup.html')    
 
 # data input to database/call mysql
-#@app.route('/signUp')
-#def signUp():
+@app.route('/signUp',methods=['POST','GET'])
+def signUp():
+    try:
+        _name = request.form['inputName']
+        _email = request.form['inputEmail']
+
+        # check and validate reception of values
+        if _name and _email:
+
+            # Call MySQL
+            conn = mysql.connect()
+            cursor = conn.cursor()
+            cursor.callproc('sp_createUser',(_name,_email))
+            data = cursor.fetchall()
+
+            if len(data) is 0:
+                conn.commit()
+                return json.dumps({'message':'User created successful!'})
+            else:
+                return json.dumps({'error':str(data[0])})
+
+        else:
+            return json.dumps({'html':'<span>Enter the required field</span>'})
+
+    except Exception as e:
+        return json.dumps({'error':str(e)})
+
+    finally:
+        cursor.close()
+        conn.close()
+
     
 
 if __name__ == "__main__":
