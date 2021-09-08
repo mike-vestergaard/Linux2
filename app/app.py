@@ -1,8 +1,10 @@
 
 
 from flask import Flask, redirect, url_for, render_template, request, session, flash
+from flask.ext.mysql import MySQL
 from datetime import timedelta
 import mysql.connector
+
 
 # connection = mysql.connector.connect (host='localhost',port='5000',
 #                                         database='Linux2',
@@ -11,10 +13,19 @@ import mysql.connector
 
 # cursor = connection.cursor()
 
+mysql = MySQL()
 app = Flask(__name__)
 # basically used for encrypt and de-crypt data
 #app.secret_key = "mysecretkey"
 #app.permanent_session_lifetime = timedelta(minutes=5)
+
+# MySQL Configurations
+app.config['MYSQL_DATABASE_USER'] =''
+app.config['MYSQL_DATABASE_EMAIL'] = ''
+app.config['MYSQL_DATABASE_DB'] = 'Linux2PJT'
+app.config['MYSQL_DATABASE_HOST'] ='localhost'
+mysql.init_app(app)
+
 
 # Test set-up of flask
 @app.route("/")
