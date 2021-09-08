@@ -1,7 +1,7 @@
 
 
 from flask import Flask, redirect, url_for, render_template, request, session, flash
-from flask.ext.mysql import MySQL
+from flaskext.mysql import MySQL
 from datetime import timedelta
 import mysql.connector
 
@@ -22,7 +22,7 @@ app = Flask(__name__)
 # MySQL Configurations
 app.config['MYSQL_DATABASE_USER'] =''
 app.config['MYSQL_DATABASE_EMAIL'] = ''
-app.config['MYSQL_DATABASE_DB'] = 'Linux2PJT'
+app.config['MYSQL_DATABASE_DB'] = 'Linux2'
 app.config['MYSQL_DATABASE_HOST'] ='localhost'
 mysql.init_app(app)
 
