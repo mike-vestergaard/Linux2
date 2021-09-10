@@ -8,6 +8,7 @@ from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from werkzeug.security import  generate_password_hash, check_password_hash
+from datetime import date
 
 
 # Create a Flask Instance
@@ -26,6 +27,17 @@ migrate = Migrate(app, db)
 # Above - In order to turn on this migration you enter following commands / creates a new directory that holds the
 # migrations (flask db init) - after this, we will make initial migration by typing in (flask db migrate -m 'Initial Migration')
 # Following we push the migration to the database by typing in (flask db upgrade)
+
+# Json webpage return
+@app.route('/date')
+def get_current_date():
+    # favorite_pizza = {
+    #     "John": "Pepperoni",
+    #     "Mary": "Cheese",
+    #     "Tim": "Mushrooms"
+    # }
+    #return favorite_pizza
+    return {"Date": date.today()}
 
 # Create Model Users in DB
 class Users(db.Model):
