@@ -3,8 +3,11 @@ from flask.helpers import safe_join
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired, Email
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+
+
 
 # Create a Flask Instance
 app = Flask(__name__)
@@ -18,13 +21,17 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:password@localhost
 app.config['SECRET_KEY'] = "hello"
 # Initialize The Database
 db = SQLAlchemy(app)
-
+migrate = Migrate(app, db)
+# Above - In order to turn on this migration you enter following commands / creates a new directory that holds the
+# migrations (flask db init) - after this, we will make initial migration by typing in (flask db migrate -m 'Initial Migration')
+# Following we push the migration to the database by typing in (flask db upgrade)
 
 # Create Model Users in DB
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), nullable=False, unique=True)
+    favorite_color = db.Column(db.String(120))
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Create A String
@@ -37,6 +44,7 @@ class Users(db.Model):
 class UserForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired()])
     email = StringField("Email", validators=[DataRequired()])
+    favorite_color = StringField("Favorite Color")
     submit = SubmitField("Submit")
 
 # New page to Updatabase Records
@@ -47,6 +55,7 @@ def update(id):
     if request.method == "POST":
         name_to_update.name = request.form['name']
         name_to_update.email = request.form['email']
+        name_to_update.favorite_color = request.form['favorite_color']
         try:
             db.session.commit()
             flash("User Updated Successfully!")
@@ -90,12 +99,13 @@ def add_user():
     if form.validate_on_submit():
         user = Users.query.filter_by(email=form.email.data).first()
         if user is None:
-            user = Users(name=form.name.data, email=form.email.data)
+            user = Users(name=form.name.data, email=form.email.data, favorite_color=form.favorite_color.data)
             db.session.add(user)
             db.session.commit()
         name = form.name.data
         form.name.data = ''
         form.email.data = ''
+        form.favorite_color.data = ''
         flash("User Added Successfully!")
     # This will return everything in the DB
     our_users = Users.query.order_by(Users.date_added)
