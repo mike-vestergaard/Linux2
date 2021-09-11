@@ -11,7 +11,7 @@ from flask_migrate import Migrate
 from werkzeug.security import  generate_password_hash, check_password_hash
 from datetime import date
 from wtforms.widgets import TextArea
-
+from flask_login import UserMixin, login_manager, login_user, LoginManager, login_required, logout_user, current_user
 
 # Create a Flask Instance
 app = Flask(__name__)
@@ -29,6 +29,55 @@ migrate = Migrate(app, db)
 # Above - In order to turn on this migration you enter following commands / creates a new directory that holds the
 # migrations (flask db init) - after this, we will make initial migration by typing in (flask db migrate -m 'Initial Migration')
 # Following we push the migration to the database by typing in (flask db upgrade)
+
+# Flask_Login Info
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Users.query.get(int(user_id))
+
+# Create Login Form
+class LoginForm(FlaskForm):
+    username = StringField("Username", validators=[DataRequired()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    submit = SubmitField("Submit")
+
+# Create Login Page
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = Users.query.filter_by(username=form.username.data).first()
+        if user:
+            # Check the hash
+            if check_password_hash(user.password_hash, form.password.data):
+                login_user(user)
+                flash("Login Successfully!")
+                return redirect(url_for('dashboard'))
+            else:
+                flash("Wrong Password - Try Again!")
+        else:
+            flash("That User Doesn't Exist! Please Try Again!")
+
+    return render_template('login.html', form=form)
+
+# Create Logout Function
+@app.route('/logout', methods=['GET', 'POST'])
+@login_required
+def logout():
+    logout_user()
+    flash("You Have Been Logged Out! Thank You For Visiting!")
+    return redirect(url_for('login'))
+
+# Create Dashboard Page
+@app.route('/dashboard', methods=['GET', 'POST'])
+@login_required
+def dashboard():
+
+    return render_template('dashboard.html')
 
 # Create a Blog Post Model
 class Posts(db.Model):
@@ -141,7 +190,8 @@ def get_current_date():
     return {"Date": date.today()}
 
 # Create Model Users in DB
-class Users(db.Model):
+class Users(db.Model, UserMixin):
+    username = db.Column(db.String(20), nullable=False, unique=True)
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), nullable=False, unique=True)
@@ -195,6 +245,7 @@ def delete(id):
 # Create a Form Class
 class UserForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired()])
+    username = StringField("Username", validators=[DataRequired()])
     email = StringField("Email", validators=[DataRequired()])
     favorite_color = StringField("Favorite Color")
     password_hash = PasswordField('Password', validators=[DataRequired(), EqualTo('password_hash2', message='Passwords Must Match!')])
@@ -262,12 +313,13 @@ def add_user():
         if user is None:
             # Hash Password
             hashed_pw = generate_password_hash(form.password_hash.data, "sha256")
-            user = Users(name=form.name.data, email=form.email.data, favorite_color=form.favorite_color.data, 
-            password_hash=hashed_pw)
+            user = Users(username=form.username.data, name=form.name.data, email=form.email.data, 
+            favorite_color=form.favorite_color.data, password_hash=hashed_pw)
             db.session.add(user)
             db.session.commit()
         name = form.name.data
         form.name.data = ''
+        form.username.data = ''
         form.email.data = ''
         form.favorite_color.data = ''
         form.password_hash = ''
