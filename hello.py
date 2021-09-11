@@ -321,14 +321,6 @@ class NamerForm(FlaskForm):
 # def index():
 #     return "<h1>Hello World!</h1>"
 
-# FILTERS
-# safe
-# capitalize
-# lower
-# upper
-# title
-# trim
-# striptags
 
 @app.route('/user/add', methods=['GET', 'POST'])
 def add_user():
@@ -362,14 +354,13 @@ def add_user():
 # Create a route decorator
 @app.route('/')
 def index():
-    first_name = "John"
-    stuff = "This is bold text"
+    first_name = " "
+    stuff = " "
 
-    favorite_pizza = ["Pepperoni", "Cheese", "Mushrooms", 41]
+    #favorite_pizza = ["Pepperoni", "Cheese", "Mushrooms", 41]
     return render_template("index.html", 
     first_name=first_name,
-    stuff=stuff,
-    favorite_pizza=favorite_pizza)
+    stuff=stuff)
 
 # localhost:5000/user/John
 @app.route('/user/<name>')
