@@ -130,9 +130,7 @@ class Posts(db.Model):
 
 class PostForm(FlaskForm):
     title = StringField("Title", validators=[DataRequired()])
-    content = StringField("Content", validators=[
-                          DataRequired()], widget=TextArea())
-
+    content = StringField("Content", validators=[DataRequired()], widget=TextArea())
     author = StringField("Author", validators=[DataRequired()])
     slug = StringField("Slugfield", validators=[DataRequired()])
     submit = SubmitField("Submit")
@@ -417,38 +415,39 @@ def page_not_found(e):
     return render_template("500.html"), 500
 
 
-# Create Password Test Page
-@app.route('/test_pw', methods=['GET', 'POST'])
-def test_pw():
-    name = None
-    email = None
-    password = None
-    pw_to_check = None
-    passed = None
-    form = PasswordForm()
+# # Create Password Test Page
 
-    # Validate Form
-    if form.validate_on_submit():
-        email = form.email.data
-        password = form.password_hash.data
-        # Clear the form
-        form.email.data = ''
-        form.password_hash.data = ''
+# @app.route('/test_pw', methods=['GET', 'POST'])
+# def test_pw():
+#     name = None
+#     email = None
+#     password = None
+#     pw_to_check = None
+#     passed = None
+#     form = PasswordForm()
 
-        # Lookup User by Email Address
-        pw_to_check = Users.query.filter_by(email=email).first()
+#     # Validate Form
+#     if form.validate_on_submit():
+#         email = form.email.data
+#         password = form.password_hash.data
+#         # Clear the form
+#         form.email.data = ''
+#         form.password_hash.data = ''
 
-        # Check Hashed Password
-        passed = check_password_hash(pw_to_check.password_hash, password)
+#         # Lookup User by Email Address
+#         pw_to_check = Users.query.filter_by(email=email).first()
 
-        # flash("Form Submitted Successfully!")
+#         # Check Hashed Password
+#         passed = check_password_hash(pw_to_check.password_hash, password)
 
-    return render_template("test_pw.html",
-                           email=email,
-                           password=password,
-                           pw_to_check=pw_to_check,
-                           passed=passed,
-                           form=form)
+#         # flash("Form Submitted Successfully!")
+
+#     return render_template("test_pw.html",
+#                            email=email,
+#                            password=password,
+#                            pw_to_check=pw_to_check,
+#                            passed=passed,
+#                            form=form)
 
 
 # Create Password Test Page
